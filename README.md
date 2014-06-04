@@ -1,4 +1,6 @@
 clear
 =====
+消除游戏
 
-clear
+common lisp写的游戏
+by evilbinary rootntsd@gmail.com
