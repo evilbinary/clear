@@ -100,7 +100,7 @@
       (setf tmp (append tmp (list (nth n x))))
       )
     (return-from nth-col tmp)))
-
+(defun main() (linker))
 (defun clear(mat)
   ;;(format t "l:~a~%" list)
   (let ((row nil)
