@@ -8,7 +8,7 @@
   (:export #:liner))
 
 (in-package my-game)
-;;æ£€æŸ¥é‡å¤ä¸ªæ•°y
+;;¼ì²éÖØ¸´¸öÊıy
 (defun compress (x)
   (if (consp x)
       (compr (car x) 1 (cdr x))
@@ -28,7 +28,7 @@
       (list n elt)
       elt))
 
-;;è§£å‹é‡å¤
+;;½âÑ¹ÖØ¸´
 (defun uncompress (lst)
   (if (null lst)
       nil
@@ -60,7 +60,7 @@
     (compress l)))
 (defmacro ll (&rest l)
 	   `(list ,@l))
-;;æ¸…é™¤ä¸€è¡Œ
+;;Çå³ıÒ»ĞĞ
 (defun clear-line(list)
   (let ((e0 (car list))
 	(count 0)
@@ -92,7 +92,7 @@
     (return-from clear-line result)))
 
 (defun nth-col(list n)
-  "è·ç¬¬nåˆ—"
+  "»ñµÚnÁĞ"
   (let ((tmp nil))
     (dolist (x list)
       ;(print x)
