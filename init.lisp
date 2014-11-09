@@ -1,3 +1,4 @@
+(ql:quickload :asdf)
 (ql:quickload :cffi)
 ;(pushnew #P"/opt/local/Library/Frameworks/" cffi:*foreign-library-directories* 
 ;	 :test #'equal)
@@ -8,4 +9,4 @@
 (ql:quickload "lispbuilder-sdl-mixer")
 (ql:quickload "lispbuilder-sdl-image")
 (load "./game.lisp")
-(my-game:linker)
+;(my-game:linker)

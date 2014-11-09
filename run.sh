@@ -1,1 +1,2 @@
-sbcl --load init.lisp
+build/linker --disable-debugger --non-interactive
+

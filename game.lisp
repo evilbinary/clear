@@ -4,10 +4,9 @@
 
 
 (defpackage #:my-game
-  (:use #:cl #:asdf )
+  (:use #:cl )
   (:nicknames #:clear)
   (:export #:linker))
-
 (in-package my-game)
 ;;检查重复个数y
 (defun compress (x)
