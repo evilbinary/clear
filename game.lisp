@@ -2,10 +2,11 @@
 ;;rootntsd@gmail.com
 ;;create date:2014-05-01
 
+
 (defpackage #:my-game
   (:use #:cl #:asdf )
   (:nicknames #:clear)
-  (:export #:liner))
+  (:export #:linker))
 
 (in-package my-game)
 ;;检查重复个数y
@@ -189,10 +190,11 @@
       ;(format t "down:~a~%" (down-line m))
       )
     (return-from down (mat-rotate mt))))
-(defvar *path* "d:/dev/lisp/sdl-game/")
-(defvar *image-path* (concatenate 'string *path* "image/"))
-(defvar *music-path* (concatenate 'string *path* "sound/"))
-(defvar *audio-path* (concatenate 'string *path* "sound/"))
+(defvar *path* *default-pathname-defaults*)
+(defvar *image-path* (merge-pathnames "image/" *path*))
+;(print *image-path*)
+(defvar *music-path* (merge-pathnames "sound/" *path*))
+(defvar *audio-path* (merge-pathnames "sound/" *path*))
 
 ;(defvar *image-path* (sdl:load-directory))
 (defvar *begin-x* 20)
@@ -259,26 +261,35 @@
     (setf array-status (list (list 1 2 3 2 4 4 1) (list 2 3 4 2 2 1 2) (list 3 4 5 3 4 5 2) (list 4 5 6 5 6 2 3) (list 5 4 3 6 1 1 4) (list 6 5 4 2 2 3 1) (list 6 5 4 2 2 3 1)  ))
     (mat-print array-status)
     ;(clear array-status)
+    (print "init sdl")
     ;; Initialize SDL
     (sdl:with-init ()
-      (sdl:window 460 480 :title-caption "clear" :icon-caption "s")
+      (print "init window")
+      ;(sdl:window 460 480 :title-caption "clear")
+      (sdl:window 600 600 )
+      (print "init frame")
       (setf (sdl:frame-rate) 30)
       (setf status "100")
+      (print "init font")
       (sdl:initialise-default-font)
-
+      (print "init image")
       (sdl-image:init-image :jpg :png :tif)
      
       (let ((images-name (list "chess0.png" "chess1.png" "chess2.png" "chess3.png" "chess4.png" "chess5.png" "chess6.png" ))
 	    (images-1 nil))
+	(print "load images")
+	;(sdl-image:load-image (merge-pathnames "chess0.png" *image-path*) :color-key-at #(90 90 ))
 	(dolist (name images-name)
 	  (format t "path:~a~%" (merge-pathnames name *image-path*))
-	  (setf images (append images (list (sdl-image:load-image (merge-pathnames name *image-path*) :color-key-at #(90 90)))))
-	  ))
+	  (setf images (append images (list (sdl-image:load-image (merge-pathnames name *image-path*) :color-key-at #(90 90))))))
+      
+      (print "load background image")
       ;load backgroud image
-      (setf image-bg (sdl-image:load-image (merge-pathnames "bg.png" *image-path*) :color-key-at #(0 0)))
+      (setf image-bg (sdl-image:load-image (merge-pathnames "bg.png" *image-path*) :color-key-at #(0 0) )))
 
-	
+      (print "mixer init")
       (sdl-mixer:init-mixer :mp3 :wav :ogg)
+      (print "load bg music")
       ;;load bg music 
       (setf mixer-opened (sdl-mixer:OPEN-AUDIO :chunksize 1024 :enable-callbacks nil))
     (when mixer-opened
