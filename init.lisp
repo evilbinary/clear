@@ -1,12 +1,14 @@
-(ql:quickload :asdf)
-(ql:quickload :cffi)
+(ql:quickload '(:asdf :cffi))
 ;(pushnew #P"/opt/local/Library/Frameworks/" cffi:*foreign-library-directories* 
 ;	 :test #'equal)
 ;install for mac port sdl-framwork version :)
 (pushnew #P"/opt/local/Library/Frameworks/" cffi:*darwin-framework-directories*
 	 :test #'equal)
-(ql:quickload "lispbuilder-sdl")
-(ql:quickload "lispbuilder-sdl-mixer")
-(ql:quickload "lispbuilder-sdl-image")
+(ql:quickload 
+  '( :lispbuilder-sdl :lispbuilder-sdl-mixer :lispbuilder-sdl-ttf 
+     :lispbuilder-sdl-image ))
+;(ql:quickload "lispbuilder-sdl")
+;(ql:quickload "lispbuilder-sdl-mixer")
+;(ql:quickload "lispbuilder-sdl-image")
 (load "./game.lisp")
-;(my-game:linker)
+;(sb-int:with-float-traps-masked (:invalid) (my-game:linker))

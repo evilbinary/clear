@@ -1,2 +1,2 @@
-build/linker --disable-debugger --non-interactive
+linker --disable-debugger --non-interactive
 

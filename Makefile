@@ -1,12 +1,11 @@
 CL=sbcl
-TARGET=build/linker
+TARGET=./linker
 
 all: $(TARGET)
 
 $(TARGET):game.lisp init.lisp make.lisp
 	$(CL) --load make.lisp
-	mv linker build/
 run:$(TARGET)
-	build/linker 
+	$(TARGET) 
 clean:
-	rm -rf build/linker
+	rm -rf $(TARGET) 

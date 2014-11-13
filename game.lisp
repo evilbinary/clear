@@ -287,7 +287,7 @@
       (setf image-bg (sdl-image:load-image (merge-pathnames "bg.png" *image-path*) :color-key-at #(0 0) )))
 
       (print "mixer init")
-      (sdl-mixer:init-mixer :mp3 :wav :ogg)
+      (sdl-mixer:init-mixer  :wav :ogg)
       (print "load bg music")
       ;;load bg music 
       (setf mixer-opened (sdl-mixer:OPEN-AUDIO :chunksize 1024 :enable-callbacks nil))
