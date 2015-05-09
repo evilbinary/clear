@@ -4,7 +4,7 @@
 
 
 (defpackage #:my-game
-  (:use #:cl )
+  (:use #:cl :cl-user)
   (:nicknames #:clear)
   (:export #:linker))
 (in-package my-game)
@@ -137,6 +137,8 @@
   `(nth ,col (nth ,row ,mat)))
 (defmacro mat-set (mat row col val)
   `(setf (mat-elt ,mat ,row ,col) ,val))
+#+darwin (defun mat-set (mat row col val)
+  (setf (mat-elt mat row col) val))
 
 (defun mat-get (mat row col)
   (values (mat-elt mat row col))
@@ -264,8 +266,8 @@
     ;; Initialize SDL
     (sdl:with-init ()
       (print "init window")
-      ;(sdl:window 460 480 :title-caption "clear")
-      (sdl:window 600 600 )
+      (sdl:window 460 480 :title-caption "clear")
+      ;(sdl:window 600 600 )
       (print "init frame")
       (setf (sdl:frame-rate) 30)
       (setf status "100")
@@ -285,15 +287,15 @@
       (print "load background image")
       ;load backgroud image
       (setf image-bg (sdl-image:load-image (merge-pathnames "bg.png" *image-path*) :color-key-at #(0 0) )))
-
       (print "mixer init")
-      (sdl-mixer:init-mixer  :wav :ogg)
+      (sdl-mixer:init-mixer  :wav :ogg :mp3)
       (print "load bg music")
       ;;load bg music 
-      (setf mixer-opened (sdl-mixer:OPEN-AUDIO :chunksize 1024 :enable-callbacks nil))
+      #-darwin(setf mixer-opened (sdl-mixer:OPEN-AUDIO  :enable-callback nil))
+      (print "open success")
     (when mixer-opened
       (setf status "Opened Audio Mixer.")
-      (setf music-bg (sdl-mixer:load-music (sdl:create-path "bgm_game.ogg" *audio-path*)))
+      (setf music-bg (sdl-mixer:load-music (sdl:create-path "test.wav" *audio-path*)))
       (setf sample (sdl-mixer:load-sample (sdl:create-path "phaser.wav" *audio-path*)))
       ;; Seems in win32, that these callbacks are only really supported by Lispworks.
       (music-finished-action)

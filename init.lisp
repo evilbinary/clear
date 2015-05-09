@@ -1,8 +1,8 @@
 (ql:quickload '(:asdf :cffi))
-;(pushnew #P"/opt/local/Library/Frameworks/" cffi:*foreign-library-directories* 
-;	 :test #'equal)
+(pushnew #P"/opt/local/lib/" cffi:*foreign-library-directories* 
+	 :test #'equal)
 ;install for mac port sdl-framwork version :)
-(pushnew #P"/opt/local/Library/Frameworks/" cffi:*darwin-framework-directories*
+#+darwin (pushnew #P"/opt/local/Library/Frameworks/" cffi:*darwin-framework-directories*
 	 :test #'equal)
 (ql:quickload 
   '( :lispbuilder-sdl :lispbuilder-sdl-mixer :lispbuilder-sdl-ttf 
