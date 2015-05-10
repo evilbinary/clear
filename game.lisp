@@ -291,11 +291,11 @@
       (sdl-mixer:init-mixer  :wav :ogg :mp3)
       (print "load bg music")
       ;;load bg music 
-      #-darwin(setf mixer-opened (sdl-mixer:OPEN-AUDIO  :enable-callback nil))
+      #-darwin(setf mixer-opened (sdl-mixer:OPEN-AUDIO  :enable-callbacks nil))
       (print "open success")
     (when mixer-opened
       (setf status "Opened Audio Mixer.")
-      (setf music-bg (sdl-mixer:load-music (sdl:create-path "test.wav" *audio-path*)))
+      (setf music-bg (sdl-mixer:load-music (sdl:create-path "bgm_game.ogg" *audio-path*)))
       (setf sample (sdl-mixer:load-sample (sdl:create-path "phaser.wav" *audio-path*)))
       ;; Seems in win32, that these callbacks are only really supported by Lispworks.
       (music-finished-action)
