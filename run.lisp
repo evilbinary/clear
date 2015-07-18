@@ -11,4 +11,7 @@
 ;(ql:quickload "lispbuilder-sdl-mixer")
 ;(ql:quickload "lispbuilder-sdl-image")
 (load "./game.lisp")
-(sb-int:with-float-traps-masked (:invalid) (my-game:linker))
+#+sbcl (sb-int:with-float-traps-masked (:invalid) (my-game:linker))
+#+ecl (my-game:linker)
+#+clisp (my-game:linker)
+#+ccl  (my-game:linker)
