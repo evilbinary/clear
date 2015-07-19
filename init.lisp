@@ -4,6 +4,8 @@
 ;install for mac port sdl-framwork version :)
 #+darwin (pushnew #P"/opt/local/Library/Frameworks/" cffi:*darwin-framework-directories*
 	 :test #'equal)
+#+darwin (pushnew #P"/System/Library/Frameworks/" cffi:*darwin-framework-directories*
+	 :test #'equal)
 (ql:quickload 
   '( :lispbuilder-sdl :lispbuilder-sdl-mixer :lispbuilder-sdl-ttf 
      :lispbuilder-sdl-image ))

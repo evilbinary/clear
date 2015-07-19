@@ -8,6 +8,12 @@
   (:nicknames #:clear)
   (:export #:linker))
 (in-package my-game)
+
+(defvar *frequency* 44100)
+(defvar *output-chunksize* 2048)
+(defvar *output-channels* 2)
+(defvar *sample-format* SDL-CFFI::AUDIO-S16LSB)
+
 ;;检查重复个数y
 (defun compress (x)
   (if (consp x)
@@ -291,16 +297,21 @@
       (sdl-mixer:init-mixer  :wav :ogg :mp3)
       (print "load bg music")
       ;;load bg music 
-      #-darwin(setf mixer-opened (sdl-mixer:OPEN-AUDIO  :enable-callbacks nil))
+      ;;(setf mixer-opened (sdl-mixer:OPEN-AUDIO  :enable-callbacks nil))
+      (setf mixer-opened (sdl-mixer:open-audio :frequency *frequency*
+                     :chunksize *output-chunksize*
+                     ;; :enable-callbacks t
+                     :format *sample-format*
+                     :channels *output-channels*))
       (print "open success")
     (when mixer-opened
       (setf status "Opened Audio Mixer.")
-      (setf music-bg (sdl-mixer:load-music (sdl:create-path "bgm_game.ogg" *audio-path*)))
+      (setf music-bg (sdl-mixer:load-music (sdl:create-path "music.mp3" *audio-path*)))
       (setf sample (sdl-mixer:load-sample (sdl:create-path "phaser.wav" *audio-path*)))
       ;; Seems in win32, that these callbacks are only really supported by Lispworks.
       (music-finished-action)
       (sample-finished-action)
-      (sdl-mixer:allocate-channels 16)
+      (sdl-mixer:allocate-channels 256)
       (play-music music-bg music-status)
       (sdl-mixer:play-sample sample)
       (format t "music-status:~a~%" music-status)
@@ -395,7 +406,7 @@
 	   (if (sdl:audio-playing-p)
 	       (setf status (format nil "Number of audio samples playing: ~d"
 				    (sdl:audio-playing-p)))
-	       (setf status "Audio complete. Press SPACE to restart.")))
+	       (setf status "Audio omplete. Press SPACE to restart.")))
          (sdl:draw-filled-circle (sdl:point :x (random 200) :y (random 10))
                                  (random 40)
                                  :color (sdl:any-color-but-this sdl:*black*)
