@@ -9,10 +9,26 @@
   (:export #:linker))
 (in-package my-game)
 
+
+(defvar *path* *default-pathname-defaults*)
+(defvar *image-path* (merge-pathnames "image/" *path*))
+;(print *image-path*)
+(defvar *music-path* (merge-pathnames "sound/" *path*))
+(defvar *audio-path* (merge-pathnames "sound/" *path*))
+(defvar *bomb-image* nil)
+
+;(defvar *image-path* (sdl:load-directory))
+(defvar *begin-x* 20)
+(defvar *begin-y* 80)
+(defvar *number-col* 6)
+(defvar *number-row* 6)
+
 (defvar *frequency* 44100)
 (defvar *output-chunksize* 2048)
 (defvar *output-channels* 2)
 (defvar *sample-format* SDL-CFFI::AUDIO-S16LSB)
+
+(defun main() (linker))
 
 ;;检查重复个数y
 (defun compress (x)
@@ -74,6 +90,7 @@
        (>= bx 0)
        (>= by 0) ;;>0 控制
 ))
+
 ;;todo clear 1 metho
 (defun clear1 (list)
   (dolist (l list)
@@ -120,7 +137,51 @@
       (setf tmp (append tmp (list (nth n x))))
       )
     (return-from nth-col tmp)))
-(defun main() (linker))
+
+
+(defun draw-image (image x y)
+  (let ((pos (sdl:point :x (+ *begin-x* (* x 48))
+				    :y (+ *begin-y* (* y 48)))))
+    (sdl:draw-surface-at  image pos)))
+
+(defun copy-mat (mat)
+  (copy-list mat))
+             
+(defun draw-diff (a b)
+  (format t "diff ~a #####~% ~a~%" a b)
+  (loop for x in a
+    for y in b
+    for i from 0
+    do 
+    (loop for xa in x
+      for xb in y
+      for j from 0
+      ;(format t "####~a ~a~%" xa xb)
+      if (not (= xa xb))
+       do
+	 (format t "~a ~a~%" xa xb)
+	 (draw-image *bomb-image* i j)
+	 (sleep 1)
+         )
+))
+
+(defun draw-imags(images mat)
+  (loop for m in mat
+     for i from 0
+     do (loop for e in m
+          for j from 0
+          for (y x) = (multiple-value-list (values i j))
+          for position = (sdl:point :x (+ *begin-x* (* x 48))
+				    :y (+ *begin-y* (* y 48)))
+          do (let ((val nil))
+               (setf val (mat-elt mat i j))
+               ;(format  t "val:~a (~a,~a) i:~a j:~a~%"  val x y i j)
+               (if (not (eq val nil))
+                   (sdl:draw-surface-at (nth val (remove nil images)) position))
+               
+	    
+	      ))))
+
 (defun clear(mat)
   ;;(format t "l:~a~%" list)
   (let ((row nil)
@@ -172,6 +233,7 @@
 (defun mat-print(mat)
   (dolist (l mat)
     (format t "~a~%" l)))
+
 (defun test-clear()
   (let ((a nil))
     (setf a (list (list 1 2 2 2 5 5) '(1 2 5 5 5 2) '(1 1 1 4 5 1) '(1 3 4 5 6 6)))
@@ -186,6 +248,7 @@
     (mat-print a)
     (format t "down-af:~%")
     (mat-print (down a))))
+
 (defun down-line (list)
   (let ((zero ())
 	(vals ()))
@@ -211,34 +274,6 @@
       ;(format t "down:~a~%" (down-line m))
       )
     (return-from down (mat-rotate mt))))
-(defvar *path* *default-pathname-defaults*)
-(defvar *image-path* (merge-pathnames "image/" *path*))
-;(print *image-path*)
-(defvar *music-path* (merge-pathnames "sound/" *path*))
-(defvar *audio-path* (merge-pathnames "sound/" *path*))
-
-;(defvar *image-path* (sdl:load-directory))
-(defvar *begin-x* 20)
-(defvar *begin-y* 80)
-(defvar *number-col* 6)
-(defvar *number-row* 6)
-
-(defun draw-imags(images mat)
-  (loop for m in mat
-     for i from 0
-     do (loop for e in m
-	    for j from 0
-	    for (y x) = (multiple-value-list (values i j))
-	    for position = (sdl:point :x (+ *begin-x* (* x 48))
-				    :y (+ *begin-y* (* y 48)))
-	    do (let ((val nil))
-		 (setf val (mat-elt mat i j))
-		 ;(format  t "val:~a (~a,~a) i:~a j:~a~%"  val x y i j)
-		 (if (not (eq val nil))
-		     (sdl:draw-surface-at (nth val (remove nil images)) position))
-	    
-	      ))))
-
 
 (defun sample-finished-action ()
   (sdl-mixer:register-sample-finished
@@ -309,6 +344,8 @@
       (print "load background image")
       ;load backgroud image
       (setf image-bg (sdl-image:load-image (merge-pathnames "bg.png" *image-path*) :color-key-at #(0 0) )))
+      (setf *bomb-image* (sdl-image:load-image (merge-pathnames "bomb.png" *image-path*) :color-key-at #(0 0) ))
+
       (print "mixer init")
       (sdl-mixer:init-mixer  :wav :ogg :mp3)
       (print "load bg music")
@@ -327,7 +364,7 @@
       ;; Seems in win32, that these callbacks are only really supported by Lispworks.
       (music-finished-action)
       (sample-finished-action)
-      (sdl-mixer:allocate-channels 256)
+      (sdl-mixer:allocate-channels 16)
       (play-music music-bg music-status)
       (sdl-mixer:play-sample sample)
       (format t "music-status:~a~%" music-status)
@@ -384,58 +421,61 @@
 	(:mouse-button-up-event (:button button :state state :x x :y y)
 				(if (= button 1)
 				    (progn 
-				  (format t "up button:~a state:~a x:~a y:~a~%" button state x y)
-				  (format t "down-x:~a down-y:~a~%" down-x down-y)
-				  (let ((swap-a-x nil)
-					(swap-a-y nil)
-					(swap-b-x nil)
-					(swap-b-y nil)
-					(swap-a-value nil)
-					(swap-b-value nil))
-				    (setf swap-a-x (floor (/ (- down-x *begin-x*) 48)))
-				    (setf swap-a-y (floor (/ (- down-y *begin-y*) 48)))
-				    (setf swap-b-x (floor (/ (- x *begin-x*) 48)))
-				    (setf swap-b-y (floor (/ (- y *begin-y*) 48)))
-				    (format t "swapa:(~a,~a) (~a,~a)~%"  swap-a-x swap-a-y swap-b-x swap-b-y)
-				    (format t "check-bound:~a~%" (check-bound swap-a-x swap-a-y swap-b-x swap-b-y))
-				   (when (and  (check-swapable swap-a-x swap-a-y swap-b-x swap-b-y) 
+                                      (format t "up button:~a state:~a x:~a y:~a~%" button state x y)
+                                      (format t "down-x:~a down-y:~a~%" down-x down-y)
+                                      (let ((swap-a-x nil)
+                                            (swap-a-y nil)
+                                            (swap-b-x nil)
+                                            (swap-b-y nil)
+                                            (swap-a-value nil)
+                                            (swap-b-value nil))
+                                        (setf swap-a-x (floor (/ (- down-x *begin-x*) 48)))
+                                        (setf swap-a-y (floor (/ (- down-y *begin-y*) 48)))
+                                        (setf swap-b-x (floor (/ (- x *begin-x*) 48)))
+                                        (setf swap-b-y (floor (/ (- y *begin-y*) 48)))
+                                        (format t "swapa:(~a,~a) (~a,~a)~%"  swap-a-x swap-a-y swap-b-x swap-b-y)
+                                        (format t "check-bound:~a~%" (check-bound swap-a-x swap-a-y swap-b-x swap-b-y))
+                                        (when (and  (check-swapable swap-a-x swap-a-y swap-b-x swap-b-y) 
 					       (check-bound swap-a-x swap-a-y swap-b-x swap-b-y))
-				     (setf swap-a-value  (mat-get array-status swap-a-y swap-a-x))
-				     (setf swap-b-value (mat-get array-status swap-b-y swap-b-x))
-				     (format t "va:~a vb:~a~%" swap-a-value swap-b-value)
-				     (format  t "va:~a vb:~a~%" (eq nil swap-a-value) (eq nil swap-b-value))
-				     (if (or  swap-a-value swap-b-value (!= swap-a-x swap-b-x) (!= swap-a-y swap-b-y) )
-					 (progn 
-					   (mat-set array-status swap-a-y swap-a-x swap-b-value)
-					   (mat-set array-status swap-b-y swap-b-x swap-a-value)
-					   (format t "set:(~a,~a)=~a set:(~a,~a)=~a~%" swap-a-x swap-a-y swap-a-value swap-b-x swap-b-y swap-b-value)))))
-				  (mat-print (clear array-status))
-				  (format t "p press~%")
-				  (setf array-status (down array-status))
-				  ))
+                                          (setf swap-a-value  (mat-get array-status swap-a-y swap-a-x))
+                                          (setf swap-b-value (mat-get array-status swap-b-y swap-b-x))
+                                          (format t "va:~a vb:~a~%" swap-a-value swap-b-value)
+                                          (if (or swap-a-value swap-b-value (!= swap-a-x swap-b-x) (!= swap-a-y swap-b-y))
+                                              (progn 
+                                                (mat-set array-status swap-a-y swap-a-x swap-b-value)
+                                                (mat-set array-status swap-b-y swap-b-x swap-a-value)
+                                                (format t "set:(~a,~a)=~a set:(~a,~a)=~a~%" swap-a-x swap-a-y swap-a-value swap-b-x swap-b-y swap-b-value)))))
+                                      (let ((old-array-status (copy-mat array-status)))
+                                        (format t "copy-mat ~a" old-array-status)
+                                        (mat-print (clear array-status))
+                                        (draw-diff old-array-status array-status)
+                                        (format t "p press~%")
+                                        (setf array-status (down array-status)))
+                                      
+                                      ))
 				)
 				
 				    
         (:idle ()
-         (sdl:clear-display sdl:*black*)
-	  (sdl:draw-surface-at image-bg  (sdl:point :x 0 :y 0))
-	 ( draw-imags images array-status)
-	 ;(format t "~%")
-         (when (sdl:audio-opened-p)
-	   (if (sdl:audio-playing-p)
-	       (setf status (format nil "Number of audio samples playing: ~d"
-				    (sdl:audio-playing-p)))
-	       (setf status "Audio omplete. Press SPACE to restart.")))
-         (sdl:draw-filled-circle (sdl:point :x (random 200) :y (random 10))
-                                 (random 40)
-                                 :color (sdl:any-color-but-this sdl:*black*)
-                                 :surface sdl:*default-display*)
-         (sdl:draw-string-solid status (sdl:point) :color sdl:*white*)
+               (sdl:clear-display sdl:*black*)
+               (sdl:draw-surface-at image-bg  (sdl:point :x 0 :y 0))
+               ( draw-imags images array-status)
+               ;(format t "~%")
+               (when (sdl:audio-opened-p)
+                 (if (sdl:audio-playing-p)
+                     (setf status (format nil "Number of audio samples playing: ~d"
+                                          (sdl:audio-playing-p)))
+                     (setf status "Audio complete. Press SPACE to restart.")))
+               (sdl:draw-filled-circle (sdl:point :x (random 200) :y (random 10))
+                                       (random 40)
+                                       :color (sdl:any-color-but-this sdl:*black*)
+                                       :surface sdl:*default-display*)
+               (sdl:draw-string-solid status (sdl:point) :color sdl:*white*)
 
-	 ;(sdl:draw-string-solid-* status 1 1 :surface sdl:*default-display* :color sdl:*white*)
-	 ;(sdl:draw-string-solid-* music-status 1 11 :surface sdl:*default-display* :color sdl:*white*)
-	 ;(sdl:draw-string-solid-* (format nil "Samples playing: ~A..." (sdl-mixer:sample-playing-p nil))
-             ;                   1 21 :surface sdl:*default-display* :color sdl:*white*)
-	; (sdl:dyraw-string-solid-* "<M> Toggle Music. <S> Play Samples." 1 40 :surface sdl:*default-display* :color sdl:*white*)
-         (sdl:update-display)
-	  )))))
+               ;(sdl:draw-string-solid-* status 1 1 :surface sdl:*default-display* :color sdl:*white*)
+               ;(sdl:draw-string-solid-* music-status 1 11 :surface sdl:*default-display* :color sdl:*white*)
+               ;(sdl:draw-string-solid-* (format nil "Samples playing: ~A..." (sdl-mixer:sample-playing-p nil))
+               ;                   1 21 :surface sdl:*default-display* :color sdl:*white*)
+               ; (sdl:dyraw-string-solid-* "<M> Toggle Music. <S> Play Samples." 1 40 :surface sdl:*default-display* :color sdl:*white*)
+               (sdl:update-display)
+               )))))
