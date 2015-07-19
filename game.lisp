@@ -60,6 +60,10 @@
       nil
       (cons elt (list-of (- n 1) elt))))
 
+(defun check-swapable (ax ay bx by)
+  (and (<= bx (+ ax 1)) (>= bx (- ax 1)) 
+	   (<= by (+ ay 1)) (>= by (- ay 1))))
+
 ;;todo clear 1 metho
 (defun clear1 (list)
   (dolist (l list)
@@ -381,7 +385,7 @@
 				    (setf swap-b-x (floor (/ (- x *begin-x*) 48)))
 				    (setf swap-b-y (floor (/ (- y *begin-y*) 48)))
 				    (format t "swapa:(~a,~a) (~a,~a)~%"  swap-a-x swap-a-y swap-b-x swap-b-y)
-				   (when (and (>= swap-a-x 0) (>= swap-a-y 0) (>= swap-b-x 0) (>= swap-b-y 0))
+				   (when (and (>= swap-a-x 0) (>= swap-a-y 0) (>= swap-b-x 0) (>= swap-b-y 0) (check-swapable swap-a-x swap-a-y swap-b-x swap-b-y))
 				     (setf swap-a-value  (mat-get array-status swap-a-y swap-a-x))
 				     (setf swap-b-value (mat-get array-status swap-b-y swap-b-x))
 				     (format t "va:~a vb:~a~%" swap-a-value swap-b-value)
