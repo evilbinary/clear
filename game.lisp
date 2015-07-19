@@ -16,6 +16,7 @@
 (defvar *music-path* (merge-pathnames "sound/" *path*))
 (defvar *audio-path* (merge-pathnames "sound/" *path*))
 (defvar *bomb-image* nil)
+(defvar *bombpath* '())
 
 ;(defvar *image-path* (sdl:load-directory))
 (defvar *begin-x* 20)
@@ -140,8 +141,10 @@
 
 
 (defun draw-image (image x y)
+  (format t "draw-image ~a ~a " x y)
   (let ((pos (sdl:point :x (+ *begin-x* (* x 48))
-				    :y (+ *begin-y* (* y 48)))))
+			:y (+ *begin-y* (* y 48)))))
+    (format t "==pos:~a" pos)
     (sdl:draw-surface-at  image pos)))
 
 (defun copy-mat (mat)
@@ -152,6 +155,7 @@
              
 (defun draw-diff (a b)
   (format t "diff ~a #####~% ~a~%" a b)
+  (setf  *bombpath* '())
   (loop for x in a
     for y in b
     for i from 0
@@ -162,13 +166,25 @@
       ;(format t "####~a ~a~%" xa xb)
       if (not (= xa xb))
        do
-	 (format t "~a ~a~%" xa xb)
-	 (draw-image *bomb-image* i j)
+	; (format t "~a ~a~%" xa xb)
+	 ;(draw-image *bomb-image* i j)
+	 (setf  *bombpath* (append *bombpath*  (list (cons i j )) ))
+	; (format t "*bombpath*:~a" *bombpath*)
 	 ;(sleep 1)
          )
        )
+  (format t "*bombpath*====~a" *bombpath*)
   ;;(sleep 1)
 )
+(defun draw-bomb ()
+  ;(format t "*bombpath*~a~%" *bombpath*)
+  (if *bombpath*
+      (loop for pos in *bombpath*
+	 do
+	   (return-from nil)
+	 ;;(format t "pos~a ~a ~a~%" pos (car pos) (cdr pos))
+	 ;;(draw-image *bomb-image* (car pos) (cdr pos))
+	)))
 
 (defun draw-imags(images mat)
   (loop for m in mat
@@ -377,7 +393,8 @@
       ;(format t "music:~a~%" music-bg)
       ;(sdl-mixer:play-music music-bg)
       )
-      
+
+(draw-image *bomb-image* 0 0)      
       (sdl:update-display)
 
       (sdl:with-events ()
@@ -467,7 +484,8 @@
                (sdl:clear-display sdl:*black*)
                (sdl:draw-surface-at image-bg  (sdl:point :x 0 :y 0))
                ( draw-imags images array-status)
-               ;(format t "~%")
+               (draw-bomb )
+	       ;;(format t "~%")
                (when (sdl:audio-opened-p)
                  (if (sdl:audio-playing-p)
                      (setf status (format nil "Number of audio samples playing: ~d"
@@ -478,7 +496,7 @@
                                        :color (sdl:any-color-but-this sdl:*black*)
                                        :surface sdl:*default-display*)
                (sdl:draw-string-solid status (sdl:point) :color sdl:*white*)
-
+	       
                ;(sdl:draw-string-solid-* status 1 1 :surface sdl:*default-display* :color sdl:*white*)
                ;(sdl:draw-string-solid-* music-status 1 11 :surface sdl:*default-display* :color sdl:*white*)
                ;(sdl:draw-string-solid-* (format nil "Samples playing: ~A..." (sdl-mixer:sample-playing-p nil))
