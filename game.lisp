@@ -145,7 +145,10 @@
     (sdl:draw-surface-at  image pos)))
 
 (defun copy-mat (mat)
-  (copy-list mat))
+  (let ((ret '()))
+    (dolist (l mat)
+      (setf ret (append (list (copy-list l)))))
+    (return-from copy-mat ret)))
              
 (defun draw-diff (a b)
   (format t "diff ~a #####~% ~a~%" a b)
@@ -161,9 +164,11 @@
        do
 	 (format t "~a ~a~%" xa xb)
 	 (draw-image *bomb-image* i j)
-	 (sleep 1)
+	 ;(sleep 1)
          )
-))
+       )
+  ;;(sleep 1)
+)
 
 (defun draw-imags(images mat)
   (loop for m in mat
@@ -446,8 +451,10 @@
                                                 (mat-set array-status swap-b-y swap-b-x swap-a-value)
                                                 (format t "set:(~a,~a)=~a set:(~a,~a)=~a~%" swap-a-x swap-a-y swap-a-value swap-b-x swap-b-y swap-b-value)))))
                                       (let ((old-array-status (copy-mat array-status)))
-                                        (format t "copy-mat ~a" old-array-status)
+                                        (format t "copy-mat ~a~%" old-array-status)
                                         (mat-print (clear array-status))
+					(format t "arry-mat ~a~%" array-status)
+					 (format t "copy-mat ~a~%" old-array-status)
                                         (draw-diff old-array-status array-status)
                                         (format t "p press~%")
                                         (setf array-status (down array-status)))
