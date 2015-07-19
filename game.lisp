@@ -61,9 +61,19 @@
       (cons elt (list-of (- n 1) elt))))
 
 (defun check-swapable (ax ay bx by)
-  (and (<= bx (+ ax 1)) (>= bx (- ax 1)) 
-	   (<= by (+ ay 1)) (>= by (- ay 1))))
+  (and (<= bx (+ ax 1)) (>= bx (- ax 1)) ;;交换只能隔壁
+       (<= by (+ ay 1)) (>= by (- ay 1))))
 
+(defun check-bound (ax ay bx by)
+  (and (<= ax *number-col*)
+       (<= bx *number-col*)
+       (<= ay *number-row*)
+       (<= by *number-row*) 
+       (>= ax 0) 
+       (>= ay 0)
+       (>= bx 0)
+       (>= by 0) ;;>0 控制
+))
 ;;todo clear 1 metho
 (defun clear1 (list)
   (dolist (l list)
@@ -210,6 +220,8 @@
 ;(defvar *image-path* (sdl:load-directory))
 (defvar *begin-x* 20)
 (defvar *begin-y* 80)
+(defvar *number-col* 6)
+(defvar *number-row* 6)
 
 (defun draw-imags(images mat)
   (loop for m in mat
@@ -385,11 +397,14 @@
 				    (setf swap-b-x (floor (/ (- x *begin-x*) 48)))
 				    (setf swap-b-y (floor (/ (- y *begin-y*) 48)))
 				    (format t "swapa:(~a,~a) (~a,~a)~%"  swap-a-x swap-a-y swap-b-x swap-b-y)
-				   (when (and (>= swap-a-x 0) (>= swap-a-y 0) (>= swap-b-x 0) (>= swap-b-y 0) (check-swapable swap-a-x swap-a-y swap-b-x swap-b-y))
+				    (format t "check-bound:~a~%" (check-bound swap-a-x swap-a-y swap-b-x swap-b-y))
+				   (when (and  (check-swapable swap-a-x swap-a-y swap-b-x swap-b-y) 
+					       (check-bound swap-a-x swap-a-y swap-b-x swap-b-y))
 				     (setf swap-a-value  (mat-get array-status swap-a-y swap-a-x))
 				     (setf swap-b-value (mat-get array-status swap-b-y swap-b-x))
 				     (format t "va:~a vb:~a~%" swap-a-value swap-b-value)
-				     (if (or (!= swap-a-x swap-b-x) (!= swap-a-y swap-b-y))
+				     (format  t "va:~a vb:~a~%" (eq nil swap-a-value) (eq nil swap-b-value))
+				     (if (or  swap-a-value swap-b-value (!= swap-a-x swap-b-x) (!= swap-a-y swap-b-y) )
 					 (progn 
 					   (mat-set array-status swap-a-y swap-a-x swap-b-value)
 					   (mat-set array-status swap-b-y swap-b-x swap-a-value)
